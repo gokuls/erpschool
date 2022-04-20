@@ -1,0 +1,363 @@
+
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block 'content' %}
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">Dashboard</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+                {% comment %} <div class="pr-2">
+                    Taluk: 
+                    <select name="taluk" id="taluk">
+
+                    </select>
+                </div> {% endcomment %}
+              <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+              <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        <div class="row">
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-info">
+              <div class="inner">
+                <h3 id="total_school"></h3>
+                <p id="district">Schools</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-university"></i>
+              </div>
+              <!--<a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>-->
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-success">
+              <div class="inner">
+                <h3 id="total_student"></h3>
+
+                <p>Students</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-person-stalker"></i>
+              </div>
+              <!--<a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>-->
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-warning">
+              <div class="inner">
+                <h3 id="total_teachers"></h3>
+
+                <p>Teaching / Non-Teaching</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-person-add"></i>
+              </div>
+              <!--<a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>-->
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-danger">
+              <div class="inner">
+                <h3 id="attendance"></h3>
+
+                <p>Present / Absent</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-person"></i>
+              </div>
+              <!--<a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>-->
+            </div>
+          </div>
+          <!-- ./col -->
+        </div>
+        <!-- /.row -->
+        <!-- Main row -->
+        <div class="row">
+          <div id="container"></div>
+          <!-- right col (We are only adding the ID to make the widgets sortable)-->
+          <section class="col-lg-6 connectedSortable">
+
+            <!-- Map card -->
+            <div class="card">
+              <div class="card-header border-0 pb-1">
+                <h3 class="card-title">
+                  <i class="fas fa-map-marker-alt mr-1"></i>
+                  Map
+                </h3>
+                <!-- card tools -->
+                <div class="card-tools">
+                    <span class="pr-1">
+                        <button type="button" class="btn btn-warning" onclick="initialLoad()">Reset</button>
+                    </span>
+                  <button type="button" class="btn btn-primary btn-sm daterange" title="Date range">
+                    <i class="far fa-calendar-alt"></i>
+                  </button>
+                  <!-- <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
+                    <i class="fas fa-minus"></i>
+                  </button> -->
+                </div>
+                <!-- /.card-tools -->
+              </div>
+              <div class="card-body pt-0 pl-1 pr-1 pb-1">
+                <div id="map" style="height: 700px; width: 100%;"></div>
+              </div>
+              <!-- /.card-body-->
+              
+            </div>
+            <!-- /.card -->
+
+          </section>
+          <!-- right col -->
+          <section class="col-lg-6 connectedSortable">
+            <div class="col-md-12">
+              <div class="card card-success">
+                  <div class="card-header">
+                    <h3 class="card-title">Attendance</h3>
+      
+                    <div class="card-tools">
+                      <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                      </button>
+                      <button type="button" class="btn btn-tool" data-card-widget="remove">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart">
+                      <canvas id="stackedBarChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;">
+                      </canvas>
+                    </div>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+            </div>
+            <div class="col-md-12">
+                <!-- BAR CHART -->
+            <div class="card card-success">
+                <div class="card-header">
+                  <h3 class="card-title">Exam Summary</h3>
+  
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="chart">
+                    <canvas id="myPieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;">
+                    </canvas>
+                </div>
+                <!-- /.card-body -->
+              </div>
+              <!-- /.card -->
+            </div>
+            </section>
+          
+        </div>
+        <!-- /.row (main row) -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+{% endblock %}
+{% block scripts %}
+
+
+
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+  
+  <script src="https://unpkg.com/browse/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js" integrity="sha512-WXoSHqw/t26DszhdMhOXOkI7qCiv5QWXhH9R7CgvgZMHz1ImlkVQ3uNsiQKu5wwbbxtPzFXd1hK4tzno2VqhpA==" crossorigin=""></script>
+    
+    <script src="{% static 'dashboard/clustermap/leaflet.markercluster.js' %}" type="text/javascript"></script>
+
+
+    <link rel="stylesheet" href="{% static  'dashboard/clustermap/screen.css' %}">
+    <link rel="stylesheet" href="{% static  'dashboard/clustermap/MarkerCluster.css' %}">
+
+    <link rel="stylesheet" href="{% static  'dashboard/clustermap/MarkerCluster.Default.css' %}">
+    <script src="{% static 'dashboard/clustermap/daman.js' %}" type="text/javascript"></script>
+
+  <script>
+
+
+</script>
+
+
+  <script src="{% static 'dashboard/leaflet/school.js' %}" type="text/javascript"></script>
+
+  
+
+
+  <script>
+var canvas = document.getElementById("stackedBarChart");
+var ctx = canvas.getContext('2d');
+var chartType = 'bar';
+var myBarChart;
+
+
+var canvas2 = document.getElementById("myPieChart");
+var ctx2 = canvas2.getContext('2d');
+var chartType2 = 'pie';
+var myBarChart2;
+
+
+
+// // Global Options:
+// Chart.defaults.global.defaultFontColor = 'grey';
+// Chart.defaults.global.defaultFontSize = 16;
+
+var data = {
+  labels: [],
+  datasets: [{
+    label: "Student Attendance",
+    fill: true,
+    lineTension: 0.3,
+    backgroundColor: "#eb34bd",
+    data: [],
+    spanGaps: true,
+  }]
+};
+
+var options = {
+  scales: {
+    y: {
+        stacked: true
+      }
+
+  },
+    indexAxis: 'y',
+};
+
+
+const DATA_COUNT = 5;
+const NUMBER_CFG = {count: DATA_COUNT, min: 0, max: 100};
+
+const data2 = {
+  labels: ['Red', 'Orange', 'Yellow', 'Green', 'Blue'],
+  datasets: [
+    {
+      label: 'Datas',
+      data: [2,3,4,5,6],
+      backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+    }
+  ]
+};
+
+
+
+const config2 = {
+  type: 'pie',
+  data: data2,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Chart.js Pie Chart'
+      }
+    }
+  },
+};
+
+
+
+init();
+
+function init() {
+  // Chart declaration:
+  myBarChart = new Chart(ctx, {
+    type: chartType,
+    data: data,
+    options: options
+  });
+
+  myPieChart = new Chart(ctx2, {
+    type: chartType2,
+    data: data2,
+    options: config2
+  });
+}
+
+    function addData(label, value) {
+      myBarChart.data.labels = label  ;
+      myBarChart.data.datasets[0].data = value
+      myBarChart.update();
+    }
+
+    function removeData() {
+      myBarChart.data.labels.pop();
+      myBarChart.data.datasets.forEach((dataset) => {
+        dataset.data.pop();
+    });
+    myBarChart.update();
+    }
+
+  </script>
+
+
+<script type="text/javascript">
+
+  var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 20,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ'
+    }),
+    latlng = L.latLng(20.3974, 72.8328);
+
+  var map = L.map('map', {center: latlng, zoom: 8, layers: [tiles]});
+
+  var markers = L.markerClusterGroup({ chunkedLoading: true });
+  
+  for (var i = 0; i < addressPoints.length; i++) {
+    var a = addressPoints[i];
+    var title = a[2];
+    var marker = L.marker(L.latLng(a[0], a[1]), { title: title });
+    marker.bindPopup(title);
+    markers.addLayer(marker);
+  }
+
+  map.addLayer(markers);
+
+</script>
+
+{% endblock %}
+
+
+  
