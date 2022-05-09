@@ -5,7 +5,7 @@ from django.views import View
 class HomeView(View):
     
     def get(self, request, *args, **kwargs):
-        return render(request, 'dashboard/index.html', context={})
+        return render(request, 'dashboard/schoolprofile.html', context={})
     
     
 class DashboardView(View):
@@ -23,3 +23,15 @@ class MapView(View):
     
     def get(self, request, *args, **kwargs):
         return render(request, 'dashboard/clustermap.html', context={})
+    
+    
+class SchoolProfileView(View):
+    
+    def get(self, request, *args, **kwargs):
+        return render(request, 'dashboard/schoolprofile.html', context={})
+    
+    
+class ConsolidationView(View):
+    
+    def get(self, request, *args, **kwargs):
+        return render(request, 'dashboard/consolidated.html', context={})

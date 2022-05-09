@@ -142,7 +142,7 @@ function initialLoad() {
         }).addTo(map);
 
 
-        $.get('http://14.139.180.56:8069/api/school_location').then((res) => {
+        $.get('http://10.184.4.238:8069/api/school_location').then((res) => {
             talukData = res.data
             let options = '<option value="">All</option>'
             talukData.forEach(element => {
@@ -155,11 +155,11 @@ function initialLoad() {
             console.log(err)
         });
 
-            $.get('http://14.139.180.56:8069/api/student_attendance?block=&cluster=&village=&school=').then((res) => {
+            $.get('http://10.184.4.238:8069/api/student_attendance?block=&cluster=&village=&school=').then((res) => {
 
                 districtData = res.data
 
-                $.get('http://14.139.180.56:8069/api/school_detail?block=&cluster=&village=&school=').then(function (res) {
+                $.get('http://10.184.4.238:8069/api/school_detail?block=&cluster=&village=&school=').then(function (res) {
                     console.log(res);
                     locations = res.data
                     console.log("Distric Data");
@@ -307,10 +307,10 @@ function getCircleColor(total, present) {
 }
 
 
-// http://14.139.180.56:8069/api/school_detail
+// http://10.184.4.238:8069/api/school_detail
 
 // Vigneswari CDAC Chennai says:
-// http://14.139.180.56:8069/api/school_location
+// http://10.184.4.238:8069/api/school_location
 
 // Vigneswari CDAC Chennai says:
 // https://github.com/geohacker/india
@@ -343,7 +343,7 @@ function onMouseOverDistrict(e) {
     let did = Districtmapping[layer.feature.properties.DISTRICT]
     console.log(`${did}`)
 
-    $.get(`http://14.139.180.56:8069/api/school_detail?block=${did}&cluster=&village=&school=`).then(function (res) {
+    $.get(`http://10.184.4.238:8069/api/school_detail?block=${did}&cluster=&village=&school=`).then(function (res) {
                     locations = res.data
                     console.log(locations)
                     

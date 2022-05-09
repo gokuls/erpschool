@@ -22,12 +22,6 @@ let schoolMarkers = []
 
 let villagePopup = []
 
-let uniqVillages = [];
-
-let villageConsolidate = [];
-
-var labels = [];
-
 let uniqGrades = []
 
 var MarkerIcon = L.Icon.extend({
@@ -72,103 +66,104 @@ info.onAdd = function (map) {
 info.update = function (props) {
     let oneSch = props
 
-    if("students" in oneSch) {
+    let ptr_ratio = '0';
 
-        $.get(`http://10.184.49.191:8069/api/school_att?school=${oneSch.school_id}`).then((data) => {
+    let csr_ratio = '0';
 
-            let class_wise = data.data;
+    if ("students" in oneSch) {
 
-            let classes = '';
+        if (oneSch.students > 0 && oneSch.teachers > 0) {
+            ptr_ratio = `${(oneSch.students / oneSch.teachers).toFixed(2)} : 1`;
+        }
 
-            class_wise.forEach((item) => {
+        if (oneSch.students > 0 && oneSch.classrooms > 0) {
+            csr_ratio = `${(oneSch.students / oneSch.classrooms).toFixed(2)} : 1`;
+        }
 
-                classes += `<tr><td class="p-1"><b>${item.class}</b></td><td class="p-1 text-center"> ${Math.round(item.percent * 100) / 100}</td></tr>`;
-            })
-
-            this._div.innerHTML = `
-            <div class="row" style="width: 290px">
+        this._div.innerHTML = `
+            <div class="row" style="width: 350px">
                 <div class="col-lg-12">
                     <div class="small-box bg-secondary mb-2" >
                         <div class="inner" style="text-align: center; padding: 5px">
-                            <h5 class="text-white m-0">${oneSch.school}</h5>
+                            <h5 class="text-white">${oneSch.school}</h5>
+                            <p style="font-size: 12px; margin: 0; font-weight: bold;">Medium: ${oneSch.medium}</p>
                         </div>
                     </div>
                 </div>
             </div>
-            <table class="table table-dark">
-                <thead>
-                    <tr><th>Class</th><th>Percentage</th></tr>
-                </thead>
-                <tbody>
-                    ${classes}
-                </tbody>
-            </table>`;
-
-        })
+            <div class="row" style="width: 350px">
+                <div class="col-lg-8">
+                    <div class="small-box bg-success mb-2" style="opacity: 0.8">
+                        <div class="inner" style="text-align: center; padding: 5px">
+                            <h4 class="text-white">${oneSch.boys} / ${oneSch.girs} (${oneSch.students})</h4>
+                            <p style="font-size: 12px; margin: 0; font-weight: bold;">Boys / Girls (Students)</p>
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="col-lg-4">
+                    <div class="small-box bg-success mb-2" style="opacity: 0.8">
+                        <div class="inner" style="text-align: center; padding: 5px">
+                            <h4 class="text-white">${oneSch.girs}</h4>
+                            <p style="font-size: 12px; margin: 0; font-weight: bold;">Girls</p>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="col-lg-4">
+                    <div class="small-box bg-warning mb-2" style="opacity: 0.8">
+                        <div class="inner" style="text-align: center; padding: 5px">
+                            <h4 class="text-dark">${oneSch.teachers}</h4>
+                            <p style="font-size: 12px; margin: 0; font-weight: bold;">Teachers</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="small-box bg-primary mb-2" style="opacity: 0.8">
+                        <div class="inner" style="text-align: center; padding: 5px">
+                            <h4 class="text-light">${ptr_ratio}</h4>
+                            <p style="font-size: 12px; margin: 0; font-weight: bold;">PTR Ratio</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="small-box bg-danger mb-2" style="opacity: 0.8">
+                        <div class="inner" style="text-align: center; padding: 5px">
+                            <h4 class="text-light">${csr_ratio}</h4>
+                            <p style="font-size: 12px; margin: 0; font-weight: bold;">CSR Ratio</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
-    else{
-        this._div.innerHTML ='';
+    else {
+        this._div.innerHTML = '';
     }
 };
 
 info.addTo(map);
 
-var legend = L.control({position: 'bottomright'});
 
-	legend.onAdd = function (map) {
+var legend = L.control({ position: 'bottomright' });
 
-		var div = L.DomUtil.create('div', 'info legend');
-        let values = [
-            {
-                label: '80-100',
-                clr: '#800026'
-            },
-            {
-                label: '60-80',
-                clr: '#BD0026'
-            },
-            {
-                label: '40-60',
-                clr: '#E31A1C'
-            },
-            {
-                label: '20-40',
-                clr: '#FC4E2A'
-            },
-            {
-                label: '0-20',
-                clr: '#FD8D3C'
-            }
-        ]
+legend.onAdd = function (map) {
 
-		values.forEach((item) => {
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+        labels = [];
 
-            labels.push(`<i style="background: ${item.clr}"></i> ${item.label}`);
-
-        })
-
-		div.innerHTML = labels.join('<br>');
-		return div;
-	};
-
-	legend.addTo(map);
-
-// get color depending on population density value
-function getColor(village) {
-
-    let p = 0;
-    try {
-        p = villageConsolidate.find((item) => item.village == village).percent
-    }
-    catch(err) {
-        console.log(err);
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + "#333333" + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
     }
 
-    return p >= 80 && p <= 100 ? '#800026' :
-            p >= 60 && p < 80  ? '#BD0026' :
-            p >= 40 && p < 60  ? '#E31A1C' :
-            p >= 20 && p < 40  ? '#FC4E2A' : '#FD8D3C';
-}
+    return div;
+};
+
+legend.addTo(map);
+
+
 
 function getDistrictColor(feature) {
     return {
@@ -203,12 +198,12 @@ function clearMarkers() {
     }
 
     if (villagePopup.length) {
-            
-            villagePopup.forEach((popup) => {
-    
-                map.removeLayer(popup);
-    
-            });
+
+        villagePopup.forEach((popup) => {
+
+            map.removeLayer(popup);
+
+        });
     }
 }
 
@@ -219,17 +214,17 @@ function initialLoad() {
 
     $(".info")[0].hidden = true;
     clearMarkers();
-    if(villageBorderGeoJSON) map.removeLayer(villageBorderGeoJSON);
-    if(districtBorderGeoJSON) map.removeLayer(districtBorderGeoJSON);
-    if(selectedVillageGeoJSON) map.removeLayer(selectedVillageGeoJSON);
+    if (villageBorderGeoJSON) map.removeLayer(villageBorderGeoJSON);
+    if (districtBorderGeoJSON) map.removeLayer(districtBorderGeoJSON);
+    if (selectedVillageGeoJSON) map.removeLayer(selectedVillageGeoJSON);
     $(".legend").html('');
     // info.update();
+
+    mapLoad = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 'attribution': 'Map data &copy; OpenStreetMap contributors' }).addTo(map);
 
     // background: white;
     // color: #333;
     // box-shadow: 0 3px 14px rgb(0 0 0 / 40%);
-
-    mapLoad = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 'attribution': 'Map data &copy; OpenStreetMap contributors' }).addTo(map);
 
     $.get('http://10.184.49.191:8069/api/school_profile?block=&cluster=&village=&school=').then((data) => {
 
@@ -244,7 +239,7 @@ function initialLoad() {
             districtBorderData = data;
 
             districtBorderGeoJSON = L.geoJson(data, {
-                
+
                 style: getDistrictColor, onEachFeature: (feature, layer) => {
 
                     layer.on({
@@ -259,8 +254,10 @@ function initialLoad() {
 
                     let latlon = layer.getBounds().getCenter();
 
-                    L.popup({permanent: true, 
-                        direction : 'bottom',autoClose: false, className: "custom-popup"}).setLatLng([latlon.lat, latlon.lng]).setContent(`<b>${layer.feature.properties.DISTRICT}</b>`).openOn(map).bringToBack();
+                    L.popup({
+                        permanent: true,
+                        direction: 'bottom', autoClose: false, className: "custom-popup"
+                    }).setLatLng([latlon.lat, latlon.lng]).setContent(`<b>${layer.feature.properties.DISTRICT}</b>`).openOn(map).bringToBack();
 
                 }
 
@@ -269,8 +266,6 @@ function initialLoad() {
         });
 
         $(".leaflet-popup-tip, .leaflet-popup-content-wrapper").addClass("add-popup-bg");
-
-
 
     });
 
@@ -321,7 +316,7 @@ function onClickDistrict(e) {
     onClickDistrictDashboard(selectedDistrict);
 
     map.fitBounds(e.target.getBounds());
-    
+
     districtBorderGeoJSON.remove();
 
     $.get(`/static/dashboard/geojson/${selectedDistrict}.json`).then((data) => {
@@ -336,7 +331,7 @@ function onClickDistrict(e) {
                 pane: 'villageborder',
 
                 fillColor: '#FC4E2A', weight: 2, opacity: 1,
-        
+
                 color: '#000000', dashArray: '', fillOpacity: 0,
 
             }, onEachFeature: (feature, layer) => {
@@ -351,35 +346,26 @@ function onClickDistrict(e) {
 
                 });
 
-                console.log(layer.feature.properties.name);
-
-                layer.setStyle({
-
-                    fillColor: getColor(layer.feature.properties.name),
-
-                    fillOpacity: 0.7
-                
-                });
-
                 let latlon = layer.getBounds().getCenter()
 
                 console.log(layer.getBounds().getCenter(), layer.feature.properties.name);
 
                 // L.CircleMarker([latlon.lat, latlon.lng]).addTo(map).bindPopup(`<b>${feature.properties.name}</b>`).openPopup();
 
-                villagePopup.push(L.popup({permanent: true, closeButton: false, 
-                    direction : 'bottom',autoClose: false, className: "custom-popup", offset: [0, 30]}).setLatLng([latlon.lat, latlon.lng]).setContent(`<b>${layer.feature.properties.name}</b>`).openOn(map).bringToBack());
+                villagePopup.push(L.popup({
+                    permanent: true, closeButton: false,
+                    direction: 'bottom', autoClose: false, className: "custom-popup", offset: [0, 30]
+                }).setLatLng([latlon.lat, latlon.lng]).setContent(`<b>${layer.feature.properties.name}</b>`).openOn(map).bringToBack());
 
             }
 
         }).addTo(map).openPopup();
-        
+
         $(".leaflet-popup-tip").removeClass("add-popup-bg");
         $(".leaflet-popup-tip, .leaflet-popup-content-wrapper").addClass("remove-popup-bg");
         $("leaflet-popup-content").addClass("remove-margin");
-        $(".legend").html(labels.join('<br>'));
         // villageBorderGeoJSON.eachLayer(function (layer) {
-            
+
         //     layer.bindPopup(layer.feature.properties.name);
 
         // }).addTo(map);
@@ -396,7 +382,7 @@ function onMouseOverVillage(e) {
     layer.setStyle({
         weight: 2,
         opacity: 1,
-        color: '#000000',
+        color: '#666',
         dashArray: '',
         fillOpacity: 0.7,
     })
@@ -416,7 +402,7 @@ function onMouseOverVillage(e) {
 
 function onMouseOutVillage(e) {
 
-    // villageBorderGeoJSON.resetStyle(e.target);
+    villageBorderGeoJSON.resetStyle(e.target);
 
     updateDashboard(schools);
 
@@ -445,54 +431,43 @@ function onClickVillage(e) {
         }
     }).addTo(map);
 
-    // $(".legend").html('');
-
 }
 
 
 function updateDashboard(school) {
 
-    let uVillages = new Set();
+    // $(".overlay-load").css("display", "flex");
+
+    // $(".overlay-load").style.display = "flex";
+
+    console.log($(".overlay-load"));
+
+    let total_students = 0;
+
+    let total_teachers = 0;
+
+    let total_staffs = 0;
 
     school.forEach((sch) => {
 
+        total_students += sch.students;
 
-        if (sch.village_name != false) {
+        total_teachers += sch.teachers;
 
-            uVillages.add(sch.village_name);
-
-        }
-
-    })
-
-    uniqVillages = Array.from(uVillages);
-
-    let villCons = [];
-
-    uniqVillages.forEach((vill) => {
-        let village = []
-        school.forEach((sch1) => {
-            if(sch1.village_name == vill) {
-                village.push(sch1);
-            }
-        })
-
-        let total = 0
-
-        village.forEach((sch2) => {
-
-            total += sch2.percent;
-
-        })
-
-        villCons.push({'village': vill, 'percent': total/village.length});
+        total_staffs += sch.staffs;
 
     })
 
-    villageConsolidate = villCons;
+    $('#total_schools').html(school.length);
 
-    console.log({villCons});
+    $('#total_students').html(total_students);
 
+    $('#total_teachers').html(total_teachers);
+
+    $('#total_staffs').html(total_staffs);
+
+    $(".overlay-load").css("display", "none");
+    // $(".overlay-load").style.display = "none";
 }
 
 
@@ -544,32 +519,31 @@ function onClickVillageDashboard(village) {
     updateDashboard(schools);
 
     gradeWiseMarker(schools);
-    
+
     schools.forEach((sch) => {
-    
-        schoolMarkers.push(L.marker([ sch.lat, sch.long ], {icon: getIconGrade(sch.grade)}).on('mouseover',function(ev) {
-            
+
+        schoolMarkers.push(L.marker([sch.lat, sch.long], { icon: getIconGrade(sch.grade) }).on('mouseover', function (ev) {
+
             this.openPopup();
-            
-        }).on('click',function(ev) {
-            
+
+        }).on('click', function (ev) {
+
             let latlng = ev.target.getLatLng();
 
             let find_school = schools.find((school) => {
                 return school.lat == latlng.lat && school.long == latlng.lng;
             });
-            
-            console.log({find_school});
 
-            info.update(find_school);
+            console.log({ find_school });
 
             $(".info")[0].hidden = false;
+
+            info.update(find_school);
 
         }).addTo(map).bindPopup(sch.school));
 
     })
 }
-
 
 function gradeWiseMarker(schools_grades) {
 
@@ -581,17 +555,17 @@ function gradeWiseMarker(schools_grades) {
 
     })
 
-    console.log({grades});
+    console.log({ grades });
 
     uniqGrades = Array.from(grades);
 
-    let icons = ["#5534A5","#FF5733 ","#581845","#006E7F","#383838","#069A8E","#FF2E63","#E900FF"];
+    let icons = ["#5534A5", "#FF5733 ", "#581845", "#006E7F", "#383838", "#069A8E", "#FF2E63", "#E900FF"];
 
     let mappedIcons = [];
 
     uniqGrades.forEach((grade, i) => {
 
-        mappedIcons.push({'grade': grade, 'iconcolor': icons[i]});
+        mappedIcons.push({ 'grade': grade, 'iconcolor': icons[i] });
 
     })
 
@@ -611,7 +585,7 @@ function gradeWiseMarker(schools_grades) {
 
 function getIconGrade(grade) {
 
-    let colorcode =  uniqGrades.find(g => g.grade == grade).iconcolor;
+    let colorcode = uniqGrades.find(g => g.grade == grade).iconcolor;
 
     return L.divIcon({
         html: `<i class="fa fa-school fa-2x" style="color: ${colorcode}"></i>`,

@@ -88,7 +88,7 @@
 		
 		for (var i = 0; i < addressPoints.length; i++) {
 			var a = addressPoints[i];
-			var title = a[2];
+			var title = a[2]+" : "+a[3];
 			var marker = L.marker(L.latLng(a[0], a[1]), { title: title });
 			marker.bindPopup(title);
 			markers.addLayer(marker);

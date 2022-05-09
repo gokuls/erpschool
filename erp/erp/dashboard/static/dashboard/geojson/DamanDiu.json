@@ -8,7 +8,8 @@
                 "ST_NM": "Daman & Diu",
                 "ST_CEN_CD": 26,
                 "DT_CEN_CD": 1,
-                "censuscode": 496
+                "censuscode": 496,
+                "fillcolor": "#FC4E2A"
             },
             "geometry": {
                 "type": "Polygon",
@@ -965,7 +966,8 @@
                 "ST_NM": "Daman & Diu",
                 "ST_CEN_CD": 25,
                 "DT_CEN_CD": 2,
-                "censuscode": 495
+                "censuscode": 495,
+                "fillcolor": "#e98df5"
             },
             "geometry": {
                 "type": "Polygon",
@@ -1242,7 +1244,8 @@
                 "ST_NM": "Daman & Diu",
                 "ST_CEN_CD": 25,
                 "DT_CEN_CD": 1,
-                "censuscode": 494
+                "censuscode": 494,
+                "fillcolor": "#aaf255"
             },
             "geometry": {
                 "type": "MultiPolygon",

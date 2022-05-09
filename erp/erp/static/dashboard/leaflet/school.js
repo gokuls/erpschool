@@ -1,5 +1,7 @@
 $("#sidenav").click();
 
+alert();
+
 let map = L.map('map', {
     keyboard: false,
     // dragging: false,
@@ -455,6 +457,8 @@ function onClickDistrict(e) {
 
                 click: onClickVillage,
             });
+
+            layer.bindPopup(feature.properties.name)
         }
     }).addTo(map);
     })

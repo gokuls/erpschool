@@ -54,8 +54,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'erp.urls'
 
-print(BASE_DIR,'=-=-=-=')
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

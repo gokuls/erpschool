@@ -23,4 +23,6 @@ urlpatterns = [
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('attendance/', AttendanceView.as_view(), name='attendance'),
     path('schoolview/', MapView.as_view(), name='schoolview'),
+    path('schoolprofile/', SchoolProfileView.as_view(), name='schoolprofile'),
+    path('consolidated', ConsolidationView.as_view(), name='consolidated'),
 ]
