@@ -4,6 +4,12 @@ let academicYear = null;
 
 let stackedBar = null;
 
+let dateParamsForStudentAnalysis = null;
+
+let dateParamsForIrregularAbsent = null;
+
+let presentParams = null;
+
 // let apiUrl = 'http://14.139.180.56:8069/api/';
 let apiUrl = 'http://10.184.49.191:8069/api/';
 
@@ -40,6 +46,8 @@ $.get(`${apiUrl}school_location`, function (data) {
 
     updateDailyAttendanceTile();
     updateSyncedTile();
+    updateIrregularAbsentTile();
+    updateStuAttAnalysisTile();
 
 });
 
@@ -63,6 +71,8 @@ $('#district').change(function () {
 
     updateDailyAttendanceTile();
     updateSyncedTile();
+    updateIrregularAbsentTile();
+    updateStuAttAnalysisTile();
 
 });
 
@@ -86,6 +96,8 @@ $("#cluster").change(function () {
 
     updateDailyAttendanceTile();
     updateSyncedTile();
+    updateIrregularAbsentTile();
+    updateStuAttAnalysisTile();
 
 });
 
@@ -112,6 +124,8 @@ $("#village").change(function () {
 
         updateDailyAttendanceTile();
         updateSyncedTile();
+        updateIrregularAbsentTile();
+        updateStuAttAnalysisTile();
 
     })
 
@@ -121,6 +135,8 @@ $("#school").change(function () {
 
     updateDailyAttendanceTile();
     updateSyncedTile();
+    updateIrregularAbsentTile();
+    updateStuAttAnalysisTile();
 
 })
 
@@ -221,6 +237,123 @@ function updateSyncedTile() {
 
 }
 
+function updateStuAttAnalysisTile(startDate='', endDate='', present='') {
+
+    let params = getParams();
+
+    console.log({ params });
+
+    dateParamsForStudentAnalysis = '';
+
+    if(startDate == '' || endDate == ''){
+
+        let today = new Date();
+        let dd = String(today.getDate()).padStart(2, '0');
+        let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        let yyyy = today.getFullYear();
+
+        dateParamsForStudentAnalysis = `&start=${yyyy}-${mm}-01&end=${yyyy}-${mm}-${dd}`;
+    }
+    else{
+        dateParamsForStudentAnalysis = `&start=${startDate}&end=${endDate}`;
+    }
+
+    $.get(`${apiUrl}student_attendance_analysis?${params+dateParamsForStudentAnalysis}`, function (data) {
+
+        console.log(data);
+
+        let stuData = data.data[0];
+
+        $("#stu-att-analysis").html(`
+        <tbody>
+        <tr>
+            <td class="text-center">Total</td>
+            <td class="text-center">${stuData.total}</td>
+        </tr>
+        <tr>
+            <td class="text-center">100% - 91%</td>
+            <td class="text-center">${stuData.green}</td>
+        </tr>
+        <tr>
+            <td class="text-center">90% - 81%</td>
+            <td class="text-center">${stuData.lgreen}</td>
+        </tr>
+        <tr>
+            <td class="text-center">80% - 61%</td>
+            <td class="text-center">${stuData.yellow}</td>
+        </tr>
+        <tr>
+            <td class="text-center">60% - 41%</td>
+            <td class="text-center">${stuData.orange}</td>
+        </tr>
+        <tr>
+            <td class="text-center">40% - 1%</td>
+            <td class="text-center">${stuData.red}</td>
+        </tr>
+        </tbody>
+        `)
+    }).catch(function (err) {
+        console.log(err);
+        $("#tile-synced").html(`<h5 class="text-center">No data found</h5>`);
+    })
+
+}
+
+
+function updateIrregularAbsentTile(startDate='', endDate='', percent='') {
+
+    let params = getParams();
+
+    console.log({ params });
+
+    dateParamsForIrregularAbsent = '';
+
+
+    if(startDate == '' || endDate == '' || percent == ''){
+
+        let today = new Date();
+        let dd = String(today.getDate()).padStart(2, '0');
+        let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        let yyyy = today.getFullYear();
+        presentParams = '5';
+        dateParamsForIrregularAbsent = `&start=${yyyy}-${mm}-01&end=${yyyy}-${mm}-${dd}`;
+    }
+    else{
+        presentParams = present
+        dateParamsForIrregularAbsent = `&start=${startDate}&end=${endDate}`;
+    }
+
+    presentParams = 5;
+
+    $.get(`${apiUrl}student_irregular_absence?${params}&percent=${presentParams}${dateParamsForIrregularAbsent}`, function (data) {
+
+        console.log(data);
+
+        let stuData = data.data[0];
+
+        $("#irregular-absent-tile").html(`
+        <thead>
+            <tr>
+                <th class="text-center">Boys</th>
+                <th class="text-center">Girls</th>
+                <th class="text-center">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="text-center">${stuData.boys}</td>
+                <td class="text-center">${stuData.girls}</td>
+                <td class="text-center">${stuData.total}</td>
+            </tr>
+        </tbody>
+        `)
+    }).catch(function (err) {
+        console.log(err);
+        $("#irregular-absent-tile").html(`<h5 class="text-center">No data found</h5>`);
+    })
+
+}
+
 function openDatatable(url) {
 
     $.get(`${apiUrl+url}?${getParams()}`, function (data) {
@@ -265,6 +398,8 @@ function generateDataTable(tableId, type, tableData) {
 
     let finaldata = [];
 
+    if(type == 'yesterday') y_data = {}
+
     tableData.forEach(function (item) {
 
         let data = {}
@@ -273,38 +408,40 @@ function generateDataTable(tableId, type, tableData) {
 
         Object.keys(item).forEach(function (key) {
 
+            if(type == 'today'){
 
-            if(key.includes('y_')) {
-
-                if(type == 'today') { 
-                    
-                    delete item[key]; 
-                
-                } else {
-
-                    y_data.push(key.split('y_')[0]);
-
+                if(key.includes('y_')){
+                    delete data[key];
                 }
-
+                else {
+                    data[key] = item[key];
+                }
             }
             else{
-
-                data[key] = item[key];
-
+                if(key.includes('y_')){
+    
+                    y_data[key] = item[key];
+    
+                }
+                else {
+                    data[key] = item[key];
+                }
             }
             
         });
-
-        if(y_data.length) {
-
-            y_data.forEach(function(key){
-
-                delete data[key];
-            
-            })
+        
+        if(type == 'today'){
+            //for today data
+            finaldata.push(data);
         }
-
-        finaldata.push(data);
+        else{
+            //for yesterday data
+            Object.keys(y_data).forEach(function(key){
+                //change yesterday to normal key
+                data[key.split('y_')[1]] = y_data[key];
+            })
+            finaldata.push(data);
+        }
 
     });
 
@@ -400,24 +537,24 @@ function openBarChart(url) {
             datasets: [
                 {
                     label               : 'Today',
-                    backgroundColor     : 'rgba(60,141,188,0.9)',
-                    borderColor         : 'rgba(60,141,188,0.8)',
+                    backgroundColor     : 'rgba(186,192,255,0.9)',
+                    borderColor         : 'rgba(186,192,255,0.8)',
                     pointRadius          : false,
                     pointColor          : '#3b8bba',
-                    pointStrokeColor    : 'rgba(60,141,188,1)',
+                    pointStrokeColor    : 'rgba(186,192,255,1)',
                     pointHighlightFill  : '#fff',
-                    pointHighlightStroke: 'rgba(60,141,188,1)',
+                    pointHighlightStroke: 'rgba(186,192,255,1)',
                     data                : chartFinalData.today
                 },
                 {
                     label               : 'Yesterday',
-                    backgroundColor     : 'rgba(210, 214, 222, 1)',
-                    borderColor         : 'rgba(210, 214, 222, 1)',
+                    backgroundColor     : 'rgba(242, 150, 201, 1)',
+                    borderColor         : 'rgba(242, 150, 201, 1)',
                     pointRadius         : false,
-                    pointColor          : 'rgba(210, 214, 222, 1)',
+                    pointColor          : 'rgba(242, 150, 201, 1)',
                     pointStrokeColor    : '#c1c7d1',
                     pointHighlightFill  : '#fff',
-                    pointHighlightStroke: 'rgba(220,220,220,1)',
+                    pointHighlightStroke: 'rgba(242, 150, 201,1)',
                     data                : chartFinalData.yesterday
                 },
             ]
@@ -438,3 +575,133 @@ function openBarChart(url) {
             $("#attendance-barchart-modal").modal('show');
     })
 }
+
+
+function openBarChartStudentAnalysis() {
+
+    $.get(`${apiUrl}student_attendance_analysis?${getParams()+dateParamsForStudentAnalysis}`, function (data) {
+
+        let res = data.data[0];
+
+        let chartFinalData = {}
+
+        chartFinalData.labels = ['100% - 91%','90% - 81%','80% - 61%','60% - 41%','40% - 1%'];
+        chartFinalData.data = [res.green, res.lgreen, res.yellow, res.orange, res.red];
+        
+
+        if (stackedBar != null) stackedBar.destroy();
+
+        var barChartCanvas = $('#barChart').get(0).getContext('2d')
+        var barChartData = {
+            labels  : chartFinalData.labels,
+            datasets: [
+                {
+                    label               : 'Percentage',
+                    backgroundColor     : 'rgba(186,192,255,0.9)',
+                    borderColor         : 'rgba(186,192,255,0.8)',
+                    pointRadius          : false,
+                    pointColor          : '#3b8bba',
+                    pointStrokeColor    : 'rgba(186,192,255,1)',
+                    pointHighlightFill  : '#fff',
+                    pointHighlightStroke: 'rgba(186,192,255,1)',
+                    data                : chartFinalData.data
+                },
+            ]
+            }
+
+        var barChartOptions = {
+        responsive              : true,
+        maintainAspectRatio     : false,
+        datasetFill             : false
+        }
+
+        stackedBar = new Chart(barChartCanvas, {
+            type: 'bar',
+            data: barChartData,
+            options: barChartOptions
+        })
+
+            $("#attendance-barchart-modal").modal('show');
+    })
+}
+
+function generateStudentAnalysisDataTable() {
+
+    $.get(`${apiUrl}student_attendance_analysis_table?${getParams()+dateParamsForStudentAnalysis}`, function(data){
+
+        let finaldata = data.data;
+
+        console.table(finaldata);
+
+        let columns = [];
+
+        let thead = Object.keys(finaldata[0]);
+
+        thead.forEach(function (item) {
+
+            columns.push({'title': item.toUpperCase(), 'data': item});
+
+        });
+
+        if ($.fn.dataTable.isDataTable('#student-analysis-table')) {
+
+            $('#student-analysis-table').DataTable().clear().destroy();               
+        
+        }
+
+        $('#student-analysis-table').html('');
+
+        $('#student-analysis-table').DataTable({
+            "autoWidth": false,
+            "processing": true,
+            "orderClasses": false,
+            "deferRender": true,
+            "retrieve": true,
+            "data": finaldata,
+            "dom": "<'row'<'col-sm-5'B>><'hr'><'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [{
+                extend: 'copyHtml5',
+                text: '<i class="fas   text-info fa-file"></i>',
+                titleAttr: 'Copy',
+            },
+            {
+                extend: 'csvHtml5',
+                title: 'student-analysis',
+                text: '<i class="fas  text-warning fa-file-alt"></i>',
+                titleAttr: 'CSV',
+            },
+            {
+                extend: 'excelHtml5',
+                title: 'student-analysis',
+                text: '<i class="fas text-success fa-file-excel"></i>',
+                titleAttr: 'EXCEL',
+            },
+            {
+                extend: 'pdfHtml5',
+                title: 'student-analysis',
+                text: '<i class="fas text-danger fa-file-pdf"></i>',
+                titleAttr: 'PDF',
+                orientation: 'landscape',
+            }],
+            "language": {
+                "search": '<i class="fa fa-search"></i>',
+                "searchPlaceholder": "search",
+                "paginate": {
+                    "previous": '<i class="fa fa-angle-left"></i>',
+                    "next": '<i class="fa fa-angle-right"></i>'
+                }
+            },
+            "lengthMenu": [[10, 20, 30, 40, -1], [10, 20, 30, 40, "All"]],
+            "columns": columns,
+        });
+
+        $("#student-analysis-modal").modal('show');
+    });
+
+}
+
+$("#present").on('change', function () {
+    let present = $("#present").val();
+    console.log(present);
+    updateIrregularAbsentTile('','',present);
+})

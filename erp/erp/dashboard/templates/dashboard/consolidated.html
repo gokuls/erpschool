@@ -19,6 +19,10 @@
     margin-bottom: 0.5rem;
   }
 
+  #example1 thead tr, #example2 thead tr {
+    background-color: #a3b9c9;
+  }
+
     </style>
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
@@ -103,7 +107,7 @@
                     <div class="col-md-4">
                         <div class="card bg-danger">
                             <div class="card-header">
-                                <h4 class="card-title">Percentage of schools synced</h4>
+                                <h4 class="card-title">Schools Synced</h4>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-primary btn-sm" onClick="openBarChart('school_attendance_sync')">
                                         <i class="fas fa-chart-bar"></i>
@@ -125,7 +129,7 @@
                     <div class="col-md-4">
                         <div class="card bg-secondary">
                             <div class="card-header">
-                                <h4 class="card-title">Percentage of Classes synced</h4>
+                                <h4 class="card-title">Classes Synced</h4>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-primary btn-sm">
                                         <i class="fas fa-chart-bar"></i>
@@ -145,7 +149,7 @@
                     <div class="col-md-4">
                         <div class="card bg-info">
                             <div class="card-header">
-                                <h4 class="card-title">Continuous Absent</h4>
+                                <h4 class="card-title">Continous Absent</h4>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-primary btn-sm">
                                         <i class="fas fa-chart-bar"></i>
@@ -219,66 +223,67 @@
                                 <div class="row mt-1">
                                     <div class="col-4">
                                         <div class="form-group">
-                                            <input class="form-control" placeholder="Present %" type="number" id="days" min="1" max="100"/>
+                                            <select class="form-control" id="present">
+                                                <option value='5' selected>5%</option>
+                                                <option value='10'>10%</option>
+                                                <option value='20'>20%</option>
+                                                <option value='30'>30%</option>
+                                                <option value='40'>40%</option>
+                                                <option value='50'>50%</option>
+                                                <option value='60'>60%</option>
+                                                <option value='70'>70%</option>
+                                                <option value='80'>80%</option>
+                                                <option value='90'>90%</option>
+                                                <option value='100'>100%</option>
+                                            </select>
                                         </div>
                                     </div>
-                                    <div class="col-4">
-                                        <div class="form-group">
-                                            <div class="input-group date" id="fromdate2" data-target-input="nearest">
-                                                <input type="text" placeholder="From" class="form-control datetimepicker-input" data-target="#fromdate2"/>
-                                                <div class="input-group-append" data-target="#fromdate2" data-toggle="datetimepicker">
-                                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                                </div>
+                                    <div class="col-8">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                              <span class="input-group-text">
+                                                <i class="far fa-calendar-alt"></i>
+                                              </span>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="form-group">
-                                            <div class="input-group date" id="todate2" data-target-input="nearest">
-                                                <input type="text" placeholder="To" class="form-control datetimepicker-input" data-target="#todate2"/>
-                                                <div class="input-group-append" data-target="#todate2" data-toggle="datetimepicker">
-                                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                                </div>
-                                            </div>
+                                            <input type="text" class="form-control float-right" id="irregular-absent-daterange">
                                         </div>
                                     </div>
                                 </div>
-                                <table class="table card-table">
-                                    <thead>
-                                        <tr>
-                                            <th class="text-center">Boys</th>
-                                            <th class="text-center">Girls</th>
-                                            <th class="text-center">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td class="text-center">200</td>
-                                            <td class="text-center">70</td>
-                                            <td class="text-center">270</td>
-                                        </tr>
-                                    </tbody>
+                                <table class="table card-table" id="irregular-absent-tile">
+                                    
                                 </table>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card bg-dark">
+                        <div class="card" style="background: #BFACB5">
                             <div class="card-header">
-                                <h4 class="card-title">Students attendance analysis</h4>
+                                <h4 class="card-title">Students Attendance Analysis</h4>
                                 <div class="card-tools">
-                                    <button type="button" class="btn btn-primary btn-sm">
+                                    <button type="button" class="btn btn-primary btn-sm" onClick="openBarChartStudentAnalysis()">
                                         <i class="fas fa-chart-bar"></i>
                                     </button>
-                                    <button type="button" class="btn btn-primary btn-sm">
+                                    <button type="button" class="btn btn-primary btn-sm" onClick="generateStudentAnalysisDataTable()">
                                         <i class="fas fa-table"></i>
                                     </button>
                                 </div>
                             </div>
                             <div class="card-block">
-                                <p class="card-text p-y-1">
-                                    Some quick example text to build on the card title .
-                                </p>
+                                <div class="row mt-2">
+                                    <div class="col-7">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                              <span class="input-group-text">
+                                                <i class="far fa-calendar-alt"></i>
+                                              </span>
+                                            </div>
+                                            <input type="text" class="form-control float-right" id="student-analysis">
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table card-table" id="stu-att-analysis">
+                                    
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -363,8 +368,17 @@
     <script>
         $("#sidenav").click();
         
-        $('#fromdate, #todate, #fromdate2, #todate2').datetimepicker({
-            format: 'L'
+        $('#fromdate, #todate, #fromdate2, #todate2, #attendance-to-date').datetimepicker({
+            format: 'L',
+        });
+        $('#student-analysis').daterangepicker({},
+        function (start, end, label) {
+            updateStuAttAnalysisTile(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+        });
+        $('#irregular-absent-daterange').daterangepicker({},
+        function (start, end, label) {
+            let present = $('#present').val();
+            updateIrregularAbsentTile(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'), present);
         });
     </script>
     <script src="{% static 'dashboard/consolidated/selectBoxFilters.js' %}">
